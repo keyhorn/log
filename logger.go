@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 	"sync"
@@ -26,7 +27,6 @@ type Logger interface {
 type LoggerImpl struct {
 	mu     sync.Mutex        // ensures atomic writes; protects the folloing fields.
 	writer Writer // log writer.
-	closed bool
 }
 
 // New creates new Logger.
@@ -72,7 +72,7 @@ func (l *LoggerImpl) Close() {
 	l.writer = nil
 }
 
-func (l *LoggerImpl) output(calldepth int, s string) error {
+func (l *LoggerImpl) output(calldepth int, s string) {
 	now := time.Now()
 	var file string
 	var line int
@@ -91,5 +91,7 @@ func (l *LoggerImpl) output(calldepth int, s string) error {
 
 	text := fmt.Sprintf("%v %s:%d %s", now.Format("2006-01-02 15:04:05"), filepath.Base(file), line, s)
 
-	return l.writer.Write(text)
+	if err := l.writer.Write(text); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
 }

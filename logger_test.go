@@ -7,7 +7,6 @@ import (
 	"github.com/keyhorn/assert/matcher"
 )
 
-var equalTo = matcher.EqualTo
 var endsWith = matcher.EndsWith
 
 type TestWriter struct {
